@@ -1,6 +1,25 @@
 (ns pcap.core
   (require [gloss (core :as glc) (io :as gio)]))
 
+(glc/defcodec udp-header
+  (glc/ordered-map :src_port     :uint16-be
+                   :dst_port     :uint16-be
+                   :len          :uint16-be
+                   :checksum     :uint16-be))
+
+(def udp-header-len 8)
+
+(defn udp-data-len
+  [h]
+  (- (:len h) udp-header-len))
+
+(glc/defcodec udp-packet
+  (glc/header udp-header
+              (fn [h]
+                (glc/finite-block (udp-data-len h)))
+              (fn [b]
+                (:header b))))
+
 (glc/defcodec ipv4-header
   (glc/ordered-map :version-len  (glc/bit-map :version 4 :header-len 4)
                    :tos          :ubyte
@@ -23,7 +42,7 @@
   (glc/header ipv4-header
               (fn [h]
                 (glc/ordered-map :options glc/nil-frame
-                                 :payload (glc/finite-block (ipv4-data-len h))))
+                                 :payload udp-packet))
               (fn [b]
                 (:header b))))
 
