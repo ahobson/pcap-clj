@@ -35,6 +35,6 @@
   (glc/header header
               get-data-codec
               (fn [b]
-                (select-keys b [:dst_addr :src_addr :protocol]))))
+                (:header b))))
 
 

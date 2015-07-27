@@ -26,11 +26,21 @@
         total-len (:len h)]
     (- total-len hdr-len)))
 
+(def data-codecs
+  {:udp udp/udp-packet})
+
+(defn get-data-codec
+  [h]
+  (glc/compile-frame
+   (glc/ordered-map :options glc/nil-frame
+                    :payload (get data-codecs (:protocol h)))
+   identity
+   (fn [data]
+     {:header h :data data})))
+
 (glc/defcodec packet
   (glc/header header
-              (fn [h]
-                (glc/ordered-map :options glc/nil-frame
-                                 :payload udp/udp-packet))
+              get-data-codec
               (fn [b]
                 (:header b))))
 
