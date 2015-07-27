@@ -2,7 +2,7 @@
   (require [gloss.core :as glc]
            [pcap.ipv4 :as ipv4]))
 
-(glc/defcodec ethernet-protocol
+(glc/defcodec protocol
   (glc/enum :uint16 {:arp           0x0806
                      :rarp          0x8035
                      :ipv4          0x0800
@@ -11,11 +11,14 @@
                      :vlan-untagged 0xffff
                      :ipv6          0x86dd}))
 
+(glc/defcodec address
+  (glc/finite-frame 6 (glc/repeated :ubyte :prefix :none)))
+
 (glc/defcodec header
   (glc/ordered-map
-   :dst_addr          (glc/finite-block 6)
-   :src_addr          (glc/finite-block 6)
-   :ethernet-protocol ethernet-protocol))
+   :dst_addr address
+   :src_addr address
+   :protocol protocol))
 
 (def data-codecs
   {:ipv4 ipv4/packet})
@@ -23,7 +26,7 @@
 (defn get-data-codec
   [h]
   (glc/compile-frame
-   (get data-codecs (:ethernet-protocol h))
+   (get data-codecs (:protocol h))
    identity
    (fn [data]
      {:link-type :ethernet :header h :data data})))
@@ -32,6 +35,6 @@
   (glc/header header
               get-data-codec
               (fn [b]
-                (select-keys b [:dst_addr :src_addr :ethernet-protocol]))))
+                (select-keys b [:dst_addr :src_addr :protocol]))))
 
 
