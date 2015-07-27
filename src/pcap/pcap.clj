@@ -13,15 +13,12 @@
                    :minor   :uint16-le
                    :zone    :int32-le
                    :sigfigs :uint32-le
-                   :snaplen :uint32-le
-                   :network link-type))
+                   :snaplen :uint32-le))
 
 (glc/defcodec packet-len
   (glc/ordered-map :len     :uint32-le
                    :pktlen  :uint32-le))
 
-(def data-codecs
-  {:ethernet ethernet/packet})
 
 (glc/defcodec len-header (glc/header packet-len
                                         (fn [h] (glc/finite-block (:len h)))
@@ -29,16 +26,47 @@
                                           {:len (alength b)
                                            :pktlen (alength b)})))
 
-(def packet-payload
-  (glc/compile-frame len-header
-                     (fn [x] (prn "DEBUG:pre:x" x) x)
-                     (fn [x] (prn "DEBUG:post:x" x) x)))
+(def payload-codecs
+  {:ethernet ethernet/packet})
 
-(glc/defcodec packet
-  (glc/ordered-map :sec     :uint32-le
-                   :usec    :uint32-le
-                   :payload packet-payload))
+(defn get-payload-header
+  [header]
+  (if-let [payload-codec (get payload-codecs (:network header))]
+    (glc/header packet-len
+                (fn [h] payload-codec)
+                (fn [b]
+                  {:len (alength b)
+                   :pktlen (alength b)}))
+    (glc/header packet-len
+                (fn [h] (glc/finite-block (:len h)))
+                (fn [b]
+                  {:len (alength b)
+                   :pktlen (alength b)}))))
+
+(defn get-payload
+  [header]
+  (glc/compile-frame
+   (glc/ordered-map :sec     :uint32-le
+                    :usec    :uint32-le
+                    :payload (get-payload-header header))
+   identity
+   (fn [body]
+     (try
+       (update-in body [:payload]
+                  (partial gio/decode packet))
+       (catch Exception e
+         body)))))
+
+(defn pcap-header->body
+  [header]
+  (let [packet-frame (get-payload header)]
+    (glc/repeated packet-frame :prefix :none)))
+
+(glc/defcodec link-type-header
+  (glc/ordered-map :network link-type))
 
 (glc/defcodec pcap
-  (glc/ordered-map :file-header    file-header
-                   :packets        (glc/repeated packet :prefix :none)))
+  (glc/ordered-map :file-header file-header
+                   :packets     (glc/header link-type-header
+                                            pcap-header->body
+                                            nil)))

@@ -22,7 +22,11 @@
 
 (defn get-data-codec
   [h]
-  (get data-codecs (:ethernet-protocol h)))
+  (glc/compile-frame
+   (get data-codecs (:ethernet-protocol h))
+   identity
+   (fn [data]
+     {:link-type :ethernet :header h :data data})))
 
 (glc/defcodec packet
   (glc/header header
