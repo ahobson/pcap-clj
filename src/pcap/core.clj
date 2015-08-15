@@ -6,4 +6,4 @@
 (defn parse
   [filename]
   (with-open [ins (io/input-stream (io/file filename))]
-    (gio/decode pcap/pcap ins)))
+    (gio/lazy-decode-all pcap/pcap ins)))

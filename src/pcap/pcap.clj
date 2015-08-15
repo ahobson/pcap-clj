@@ -1,5 +1,5 @@
 (ns pcap.pcap
-  (require [gloss.core :as glc]
+  (require [gloss (core :as glc) (io :as gio)]
            [pcap (ethernet :as ethernet)]))
 
 (glc/defcodec link-type
@@ -53,7 +53,7 @@
    (fn [body]
      (try
        (update-in body [:payload]
-                  (partial gio/decode packet))
+                  (partial gio/decode ethernet/packet))
        (catch Exception e
          body)))))
 

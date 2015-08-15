@@ -27,7 +27,7 @@
     (- total-len hdr-len)))
 
 (def data-codecs
-  {:udp udp/udp-packet})
+  {:udp udp/packet})
 
 (defn get-data-codec
   [h]
