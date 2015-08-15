@@ -13,7 +13,8 @@
                    :minor   :uint16-le
                    :zone    :int32-le
                    :sigfigs :uint32-le
-                   :snaplen :uint32-le))
+                   :snaplen :uint32-le
+                   :network link-type))
 
 (glc/defcodec packet-len
   (glc/ordered-map :len     :uint32-le
@@ -57,16 +58,7 @@
        (catch Exception e
          body)))))
 
-(defn pcap-header->body
-  [header]
-  (let [packet-frame (get-payload header)]
-    (glc/repeated packet-frame :prefix :none)))
+(defn packet
+  [file-header]
+  (get-payload file-header))
 
-(glc/defcodec link-type-header
-  (glc/ordered-map :network link-type))
-
-(glc/defcodec pcap
-  (glc/ordered-map :file-header file-header
-                   :packets     (glc/header link-type-header
-                                            pcap-header->body
-                                            nil)))
