@@ -1,7 +1,7 @@
 (ns pcap.core
-  (require [clojure.java.io :as io]
-           [gloss (core :as gcore) (io :as gio)]
-           [pcap.pcap :as pcap]))
+  (:require [clojure.java.io :as io]
+            [gloss (core :as gcore) (io :as gio)]
+            [pcap.pcap :as pcap]))
 
 (defn parse
   [filename]

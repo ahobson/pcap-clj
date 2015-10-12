@@ -1,5 +1,5 @@
 (ns pcap.codec
-  require [gloss (core :as glc) (protocols :as gp)])
+  (:require [gloss (core :as glc) (protocols :as gp)]))
 
 (defn header-with-metadata
   [codec header->body body->header]

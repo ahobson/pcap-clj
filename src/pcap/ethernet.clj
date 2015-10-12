@@ -1,6 +1,6 @@
 (ns pcap.ethernet
-  (require [gloss.core :as glc]
-           [pcap.ipv4 :as ipv4]))
+  (:require [gloss.core :as glc]
+            [pcap.ipv4 :as ipv4]))
 
 (glc/defcodec protocol
   (glc/enum :uint16 {:arp           0x0806

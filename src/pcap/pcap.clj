@@ -1,6 +1,6 @@
 (ns pcap.pcap
-  (require [gloss (core :as glc) (io :as gio)]
-           [pcap (ethernet :as ethernet)]))
+  (:require [gloss (core :as glc) (io :as gio)]
+            [pcap (ethernet :as ethernet)]))
 
 (glc/defcodec link-type
   (glc/enum :uint32-le {:null       0

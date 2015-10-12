@@ -1,6 +1,6 @@
 (ns pcap.ipv4
-  (require [gloss.core :as glc]
-           [pcap.udp :as udp]))
+  (:require [gloss.core :as glc]
+            [pcap.udp :as udp]))
 
 (glc/defcodec ip-protocols
   (glc/enum :ubyte {:icmp  0x01

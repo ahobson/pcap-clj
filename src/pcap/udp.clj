@@ -1,5 +1,5 @@
 (ns pcap.udp
-  (require [gloss.core :as glc]))
+  (:require [gloss.core :as glc]))
 
 (glc/defcodec header
   (glc/ordered-map :src_port     :uint16-be
